@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "typki"
+version = "0.1.0"
+description = "A cli for exporting anki cards from a typst document"
+authors = [{ name = "JL710" }]
+readme = "README.md"
+requires-python = ">=3.7"
+dependencies = ["beautifulsoup4~=4.13.4"]
+
+[project.scripts]
+typki = "typki:main"
