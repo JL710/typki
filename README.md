@@ -4,7 +4,7 @@
 Copy [`typki.typ`](./typki.typ) into your project.
 
 Create simple notes:
-```typc
+```typ
 #import "typki.typ": note, basic
 
 #note(
@@ -40,7 +40,7 @@ There are shorthands for:
 
 ### Create custom shorthands
 
-```typc
+```typ
 #let cloze(guid, field1, field2, deck: none, display: (a, b) => {}) = note(
   guid,
   field1,
@@ -53,17 +53,17 @@ There are shorthands for:
 
 ### Default Decks
 
-```typc
+```typ
 #import "typki.typ": with-deck
 ```
 
 Set the default deck for the rest of the document:
-```typc
+```typ
 #show: with-deck.with("test-deck")
 ```
 
 Set the default deck for a part of the document:
-```typc
+```typ
 #with-deck("parent")[
   // this note will be in deck "parent"
   #basic("1", [A], [B])
@@ -94,13 +94,13 @@ This means that you can not use stuff like `set page` that is not valid on html 
 Instead you can use `on_paged` from typki.
 
 If you had previously:
-```typc
+```typ
 #set page(header: [example header])
 
 #lorem(15)
 ```
 You need to convert it to:
-```typc
+```typ
 #import "typki.typ": on_paged
 
 #show: on_paged.with(body => {
@@ -118,7 +118,7 @@ Fortunately there is a workaround for that.
 
 Wrapping an element in `frame` converts it to svg and embeds that into the html. That way elements can be displayed properly on html.
 
-```typc
+```typ
 #import "typki.typ": frame
 
 #frame[$ x / y^2 $]
