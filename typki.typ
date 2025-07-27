@@ -23,9 +23,9 @@
   }
 }
 
-#let frame(body) = context {
+#let frame(body, text_color: rgb("#0099FF")) = context {
   if __target() == "html" {
-    set text(fill: rgb("#0099FF"))
+    set text(fill: text_color)
     html.frame(body)
   } else {
     body

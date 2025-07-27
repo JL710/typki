@@ -124,7 +124,7 @@ Wrapping an element in `frame` converts it to svg and embeds that into the html.
 #frame[$ x / y^2 $]
 ```
 
-> **Note:** Text inside of the svg can not adapt to the font color set in html. This is why typki sets a font that can be read quite good on dark and light backgrounds.
+> **Note:** Text inside of the svg can not adapt to the font color set in html. This is why typki sets a font that can be read quite good on dark and light backgrounds. If you do not like the color, you can overwrite it by specifying the `text_color` argument on `frame`.
 
 ## Install and use Cli
 
