@@ -91,7 +91,7 @@ Since the typst content is compiled to html, your whole document needs to be htm
 #### Elements that are only available on paged
 
 This means that you can not use stuff like `set page` that is not valid on html as before.
-Instead you can use `on_paged` from typki.
+Instead you can use `show-target` from [bullseye](https://typst.app/universe/package/bullseye).
 
 If you had previously:
 ```typ
@@ -101,11 +101,11 @@ If you had previously:
 ```
 You need to convert it to:
 ```typ
-#import "typki.typ": on_paged
+#import "@preview/bullseye:0.1.0": show-target
 
-#show: on_paged.with(body => {
+#show: show-target(paged: doc => {
   set page(header: [example header])
-  body
+  doc
 })
 
 #lorem(15)
@@ -116,7 +116,7 @@ Sadly, there is no better workaround for this yet.
 Elements like math can not be properly converted to html. 
 Fortunately there is a workaround for that.
 
-Wrapping an element in `frame` converts it to svg and embeds that into the html. That way elements can be displayed properly on html.
+Wrapping an element in `frame` converts it to svg and embeds that into the html. That way elements can be displayed properly on html. The `frame` from typki differs from the std one, because it always displays the content and never panics.
 
 ```typ
 #import "typki.typ": frame

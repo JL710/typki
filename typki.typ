@@ -1,30 +1,11 @@
-// this is a workaround for the target function and wont cause errors when compiled without the html feature flag
-#let __target = dictionary(std).at("target", default: () => "paged")
+#import "@preview/bullseye:0.1.0": on-target, target
 
-///
-/// #show: on_paged.with(body => {
-///   set page(paper: "a4", header: [example header])
-///   body
-/// })
-#let on_paged(on, body) = {
-  context {
-    if __target() == "paged" {
-      show: on
-      body
-    } else {
-      body
-    }
-  }
-}
-
-#let __elem(tag, attrs: (:), body) = context {
-  if __target() == "html" {
-    html.elem(tag, attrs: attrs, body)
-  }
+#let __elem(tag, attrs: (:), body) = context if target() == "html" {
+  html.elem(tag, attrs: attrs, body)
 }
 
 #let frame(body, text_color: rgb("#0099FF")) = context {
-  if __target() == "html" {
+  if target() == "html" {
     set text(fill: text_color)
     html.frame(body)
   } else {
@@ -88,9 +69,9 @@
       __elem("field2", field2)
     })
 
-    if __target() == "paged" {
+    on-target(paged: {
       display(field1, field2)
-    }
+    })
   }
 }
 
