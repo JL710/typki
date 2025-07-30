@@ -27,7 +27,7 @@ def compile_typst(location, args) -> str:
     except subprocess.CalledProcessError:
         print("Error while compiling the document", file=sys.stderr)
         sys.exit(1)
-    with open(output_path, "r") as f:
+    with open(output_path, "r", encoding="utf-8") as f:
         html = "".join(f.readlines())
     os.remove(output_path)
     return html
@@ -76,7 +76,7 @@ def main():
 
     notes = parse_notes(total_content)
 
-    with open("anki-export.txt", "w") as f:
+    with open("anki-export.txt", "w", encoding="utf-8") as f:
         f.write(generate_anki_file(notes))
 
 if __name__ == "__main__":
