@@ -40,6 +40,10 @@
 
 #let display_field1(field1, _) = field1
 #let display_field2(_, field2) = field2
+#let display_all(field1, field2) = {
+  field1
+  field2
+}
 
 /// Adds a note to the Anki export for the given name.
 #let note(guid, field1, field2, note-type: none, deck: none, display: (a, b) => {}) = {
