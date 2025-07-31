@@ -4,6 +4,8 @@
   html.elem(tag, attrs: attrs, body)
 }
 
+#let __on_anki = "typki" in sys.inputs
+
 #let frame(body, text_color: rgb("#0099FF")) = context {
   if target() == "html" {
     set text(fill: text_color)
@@ -53,25 +55,27 @@
   context {
     let data = __checked_init_state()
 
-    let note-deck = deck
-    if note-deck == none {
-      note-deck = __active_deck().at(0)
-    }
-
-    let note-type = note-type
-    if note-type == none {
-      if data.at("note-type").last() == none {
-        note-type = ""
-      } else {
-        note-type = data.at("note-type").last()
+    if __on_anki {
+      let note-deck = deck
+      if note-deck == none {
+        note-deck = __active_deck().at(0)
       }
-    }
 
-    __elem("anki", {
-      __elem("meta", attrs: (guid: guid, note-type: note-type, deck: note-deck), [])
-      __elem("field1", field1)
-      __elem("field2", field2)
-    })
+      let note-type = note-type
+      if note-type == none {
+        if data.at("note-type").last() == none {
+          note-type = ""
+        } else {
+          note-type = data.at("note-type").last()
+        }
+      }
+
+      __elem("anki", {
+        __elem("meta", attrs: (guid: guid, note-type: note-type, deck: note-deck), [])
+        __elem("field1", field1)
+        __elem("field2", field2)
+      })
+    }
 
     on-target(paged: {
       display(field1, field2)
@@ -107,27 +111,31 @@
 )
 
 #let with-note-type(note-type, body) = {
-  context {
-    let data = __checked_init_state()
-    data.at("note-type").push(note-type)
-    state(__state_name).update(data)
+  if __on_anki {
+    context {
+      let data = __checked_init_state()
+      data.at("note-type").push(note-type)
+      state(__state_name).update(data)
+    }
   }
   body
 }
 
 #let with-deck(deck, force: false, sub-deck: false, body) = {
-  context {
-    let active_deck = __active_deck()
-    if not active_deck.at(1) {
-      let data = __checked_init_state()
-      let deck = deck
-      if sub-deck {
-        if active_deck != "" {
-          deck = active_deck.at(0) + "::" + deck
+  if __on_anki {
+    context {
+      let active_deck = __active_deck()
+      if not active_deck.at(1) {
+        let data = __checked_init_state()
+        let deck = deck
+        if sub-deck {
+          if active_deck != "" {
+            deck = active_deck.at(0) + "::" + deck
+          }
         }
+        data.at("decks").push((deck, force))
+        state(__state_name).update(data)
       }
-      data.at("decks").push((deck, force))
-      state(__state_name).update(data)
     }
   }
   body

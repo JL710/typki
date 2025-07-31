@@ -23,7 +23,7 @@ def remove_spacing(content: str) -> str:
 def compile_typst(location, args) -> str:
     output_path = "anki-export.html"
     try:
-        subprocess.check_output(f"typst compile --features html --format html {location} {output_path} {' '.join(args)}", shell=True)
+        subprocess.check_output(f"typst compile --input typki=\"\" --features html --format html {location} {output_path} {' '.join(args)}", shell=True)
     except subprocess.CalledProcessError:
         print("Error while compiling the document", file=sys.stderr)
         sys.exit(1)
