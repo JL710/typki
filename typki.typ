@@ -4,7 +4,7 @@
   html.elem(tag, attrs: attrs, body)
 }
 
-#let __on_anki = "typki" in sys.inputs
+#let __on_anki() = "typki" in sys.inputs and target() == "html"
 
 #let frame(body, text_color: rgb("#0099FF")) = context {
   if target() == "html" {
@@ -53,9 +53,9 @@
     panic("guid can not be an empty string")
   }
   context {
-    let data = __checked_init_state()
+    if __on_anki() {
+      let data = __checked_init_state()
 
-    if __on_anki {
       let note-deck = deck
       if note-deck == none {
         note-deck = __active_deck().at(0)
@@ -76,10 +76,9 @@
         __elem("field2", field2)
       })
     }
-
-    on-target(paged: {
+    if not __on_anki() {
       display(field1, field2)
-    })
+    }
   }
 }
 
@@ -110,9 +109,24 @@
   display: display,
 )
 
+#let c(number, body, hint: none) = context {
+  if __on_anki() {
+    // FIXME: this does not escape! Should use elem instead so that the python script can do the escaping
+    "{{c" + str(number) + "::"
+    body
+    if hint != none {
+      "::"
+      hint
+    }
+    "}}"
+  } else {
+    body
+  }
+}
+
 #let with-note-type(note-type, body) = {
-  if __on_anki {
-    context {
+  context {
+    if __on_anki() {
       let data = __checked_init_state()
       data.at("note-type").push(note-type)
       state(__state_name).update(data)
@@ -122,8 +136,8 @@
 }
 
 #let with-deck(deck, force: false, sub-deck: false, body) = {
-  if __on_anki {
-    context {
+  context {
+    if __on_anki() {
       let active_deck = __active_deck()
       if not active_deck.at(1) {
         let data = __checked_init_state()
