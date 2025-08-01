@@ -29,21 +29,11 @@
 
 // state layout:
 // ("deck": (("", false), ("deck1", force), ("deck2", true)), "note-type": (none, "basic", "basic and reverse"))
-#let __state_name = "typki-data"
+#let __state = state("typki-data", ("deck": (("", false),), "note-type": (none,), "existing-guids": ("",)))
 
-#let __checked_init_state() = {
-  let data = state(__state_name).get()
-  if data == none {
-    data = ("deck": (("", false),), "note-type": (none,), "existing-guids": ("",))
-    let _ = state(__state_name).update(data)
-  }
-  data
-}
-
-#let __active_deck() = {
-  let data = __checked_init_state()
-  let final_deck = data.at("deck").last()
-  for deck in data.at("deck") {
+#let __active_deck(state) = {
+  let final_deck = state.at("deck").last()
+  for deck in state.at("deck") {
     if deck.at(1) {
       final_deck = deck
       break
@@ -81,11 +71,11 @@
   }
   if on_typki {
     display([], [], context {
-      let data = __checked_init_state()
+      let data = __state.get()
 
       let note-deck = deck
       if note-deck == none {
-        note-deck = __active_deck().at(0)
+        note-deck = __active_deck(data).at(0)
       }
 
       let note-type = note-type
@@ -104,14 +94,16 @@
       })
     })
   } else {
-    display(field1, field2, context {
-      let data = __checked_init_state()
-      if guid in data.at("existing-guids") {
-        panic("Guid " + guid + "already exists!")
-      } else {
-        data.at("existing-guids").push(guid)
-        state(__state_name).update(data)
+    display(field1, field2, {
+      context {
+        if guid in __state.get().at("existing-guids") {
+          panic("Guid " + guid + "already exists!")
+        }
       }
+      __state.update(state => {
+        state.at("existing-guids").push(guid)
+        state
+      })
     })
   }
 }
@@ -160,31 +152,29 @@
 
 #let with-note-type(note-type, body) = {
   if on_typki() {
-    context {
-      let data = __checked_init_state()
-      data.at("note-type").push(note-type)
-      state(__state_name).update(data)
-    }
+    __state.update(state => {
+      state.at("note-type").push(note-type)
+      state
+    })
   }
   body
 }
 
 #let with-deck(deck, force: false, sub-deck: false, body) = {
   if on_typki {
-    context {
-      let active_deck = __active_deck()
+    __state.update(state => {
+      let active_deck = __active_deck(state)
       if not active_deck.at(1) {
-        let data = __checked_init_state()
         let deck = deck
         if sub-deck {
           if active_deck != "" {
             deck = active_deck.at(0) + "::" + deck
           }
         }
-        data.at("deck").push((deck, force))
-        state(__state_name).update(data)
+        state.at("deck").push((deck, force))
       }
-    }
+      state
+    })
   }
   body
 }
