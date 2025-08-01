@@ -4,7 +4,7 @@
   html.elem(tag, attrs: attrs, body)
 }
 
-#let __on_anki() = "typki" in sys.inputs and target() == "html"
+#let on_typki = "typki" in sys.inputs
 
 #let frame(body, text_color: rgb("#0099FF")) = context {
   if target() == "html" {
@@ -15,14 +15,26 @@
   }
 }
 
+/// lets all math equations be in a frame on html
+#let math-framed(body) = {
+  show math.equation: it => {
+    if it.block {
+      frame(it)
+    } else {
+      box(frame(it))
+    }
+  }
+  body
+}
+
 // state layout:
-// ("decks": (("", false), ("deck1", force), ("deck2", true)), "note-type": (none, "basic", "basic and reverse"))
-#let __state_name = "anki-data"
+// ("deck": (("", false), ("deck1", force), ("deck2", true)), "note-type": (none, "basic", "basic and reverse"))
+#let __state_name = "typki-data"
 
 #let __checked_init_state() = {
   let data = state(__state_name).get()
-  if state(__state_name).get() == none {
-    data = ("decks": (("", false),), "note-type": (none,))
+  if data == none {
+    data = ("deck": (("", false),), "note-type": (none,), "existing-guids": ("",))
     let _ = state(__state_name).update(data)
   }
   data
@@ -30,8 +42,8 @@
 
 #let __active_deck() = {
   let data = __checked_init_state()
-  let final_deck = data.at("decks").last()
-  for deck in data.at("decks") {
+  let final_deck = data.at("deck").last()
+  for deck in data.at("deck") {
     if deck.at(1) {
       final_deck = deck
       break
@@ -40,20 +52,35 @@
   final_deck
 }
 
-#let display_field1(field1, _) = field1
-#let display_field2(_, field2) = field2
-#let display_all(field1, field2) = {
+#let display_field1(field1, _, typki_body) = {
+  field1
+  typki_body
+}
+#let display_field2(_, field2, typki_body) = {
+  field2
+  typki_body
+}
+#let display_all(field1, field2, typki_body) = {
   field1
   field2
+  typki_body
 }
+#let display_array(field1, field2, typki_body) = (
+  field1,
+  {
+    field2
+    typki_body
+  },
+)
+#let display_none(_, _, typki_body) = typki_body
 
 /// Adds a note to the Anki export for the given name.
-#let note(guid, field1, field2, note-type: none, deck: none, display: (a, b) => {}) = {
+#let note(guid, field1, field2, note-type: none, deck: none, display: display_none) = {
   if guid == "" {
     panic("guid can not be an empty string")
   }
-  context {
-    if __on_anki() {
+  if on_typki {
+    display([], [], context {
       let data = __checked_init_state()
 
       let note-deck = deck
@@ -75,14 +102,21 @@
         __elem("field1", field1)
         __elem("field2", field2)
       })
-    }
-    if not __on_anki() {
-      display(field1, field2)
-    }
+    })
+  } else {
+    display(field1, field2, context {
+      let data = __checked_init_state()
+      if guid in data.at("existing-guids") {
+        panic("Guid " + guid + "already exists!")
+      } else {
+        data.at("existing-guids").push(guid)
+        state(__state_name).update(data)
+      }
+    })
   }
 }
 
-#let basic-reverse(guid, field1, field2, deck: none, display: (a, b) => {}) = note(
+#let basic-reverse(guid, field1, field2, deck: none, display: display_none) = note(
   guid,
   field1,
   field2,
@@ -91,7 +125,7 @@
   display: display,
 )
 
-#let basic(guid, field1, field2, deck: none, display: (a, b) => {}) = note(
+#let basic(guid, field1, field2, deck: none, display: display_none) = note(
   guid,
   field1,
   field2,
@@ -100,7 +134,7 @@
   display: display,
 )
 
-#let cloze(guid, field1, field2, deck: none, display: (a, b) => {}) = note(
+#let cloze(guid, field1, field2: "", deck: none, display: display_none) = note(
   guid,
   field1,
   field2,
@@ -109,8 +143,8 @@
   display: display,
 )
 
-#let c(number, body, hint: none) = context {
-  if __on_anki() {
+#let c(number, body, hint: none) = {
+  if on_typki {
     // FIXME: this does not escape! Should use elem instead so that the python script can do the escaping
     "{{c" + str(number) + "::"
     body
@@ -125,8 +159,8 @@
 }
 
 #let with-note-type(note-type, body) = {
-  context {
-    if __on_anki() {
+  if on_typki() {
+    context {
       let data = __checked_init_state()
       data.at("note-type").push(note-type)
       state(__state_name).update(data)
@@ -136,8 +170,8 @@
 }
 
 #let with-deck(deck, force: false, sub-deck: false, body) = {
-  context {
-    if __on_anki() {
+  if on_typki {
+    context {
       let active_deck = __active_deck()
       if not active_deck.at(1) {
         let data = __checked_init_state()
@@ -147,7 +181,7 @@
             deck = active_deck.at(0) + "::" + deck
           }
         }
-        data.at("decks").push((deck, force))
+        data.at("deck").push((deck, force))
         state(__state_name).update(data)
       }
     }

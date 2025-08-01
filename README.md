@@ -84,6 +84,15 @@ Parameters of with-deck:
 - `sub-deck: false`: If set to true, makes the deck a subdeck of the previous parent deck
 - `body`: The area where the deck is applied to 
 
+### Cloze
+Typki also provides a wrapper for close deletion.
+
+```typ
+#import "typki.typ": c
+
+#c(1)[this will show in normal documents and will be interpreted as c1 in cloze deletion]
+```
+
 ### Html Trouble
 
 Since the typst content is compiled to html, your whole document needs to be html compatible.
@@ -125,6 +134,12 @@ Wrapping an element in `frame` converts it to svg and embeds that into the html.
 ```
 
 > **Note:** Text inside of the svg can not adapt to the font color set in html. This is why typki sets a font that can be read quite good on dark and light backgrounds. If you do not like the color, you can overwrite it by specifying the `text_color` argument on `frame`.
+
+If you want to wrap all math equations by default in frames, you can do that as well:
+```typ
+#import "typki.typ": math-framed
+#show: math-framed
+```
 
 ## Install and use Cli
 
