@@ -40,6 +40,9 @@ class Note:
     field1: str
     field2: str
 
+def html_children_to_string(perent_element) -> str:
+    return remove_spacing("".join([BeautifulSoup(str(x.encode(), "utf-8"), "html.parser").prettify(formatter="minimal") for x in perent_element.contents]))
+
 def parse_notes(content) -> list[Note]:
     soup = BeautifulSoup(content, "html.parser")
 
@@ -51,9 +54,10 @@ def parse_notes(content) -> list[Note]:
             meta_tag["guid"], 
             meta_tag["deck"], 
             meta_tag["note-type"], 
-            remove_spacing("".join([BeautifulSoup(str(x.encode(), "utf-8"), "html.parser").prettify(formatter="minimal") for x in anki_tag.find("field1").contents])), 
-            remove_spacing("".join([BeautifulSoup(str(x.encode(), "utf-8"), "html.parser").prettify(formatter="minimal") for x in anki_tag.find("field2").contents]))
-            ))
+            html_children_to_string(anki_tag.find("field1")),
+            html_children_to_string(anki_tag.find("field2")),
+            )
+        )
 
     return notes
 
